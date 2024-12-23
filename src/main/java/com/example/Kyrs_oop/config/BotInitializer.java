@@ -1,5 +1,6 @@
-package config;
+package com.example.Kyrs_oop.config;
 
+import com.example.Kyrs_oop.bot.TelegramBot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -22,7 +23,6 @@ public class BotInitializer {
         try{
             telegramBotsApi.registerBot(telegramBot);
         } catch (TelegramApiException e){
-            System.out.println("ошибка 2");
 
         }
     }
