@@ -1,23 +1,27 @@
-package com.example.Kyrs_oop.bot;
+package com.example.Kyrs_oop.service;
 
 import com.example.Kyrs_oop.config.BotConfig;
-import com.example.Kyrs_oop.service.ApiResponse;
-import com.example.Kyrs_oop.service.Request;
-import com.example.Kyrs_oop.service.ResponseParser;
+
 import lombok.AllArgsConstructor;
-import com.example.Kyrs_oop.module.CurrencyModel;
 import org.springframework.expression.ParseException;
+import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
 
 @Component
 @AllArgsConstructor
+
+
 public class TelegramBot extends TelegramLongPollingBot {
+    String standart_week_day = "";
+    String standart_week = "3";
+    String standart_season = "autumn";
+    String standart_year = "2024";
+
     private final BotConfig botConfig;
 
     @Override
@@ -35,31 +39,30 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         String responseText = "";
 
-        if(update.hasMessage() && update.getMessage().hasText()){
+        if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
+            if (messageText.equals("/start")) {
+                startCommand(chatId, update.getMessage().getChat().getFirstName());
+            } else if (messageText.equals("/help")) {
+                helpCommand(chatId);
 
-            switch (messageText){
-                case "/start":
-                    startCommand(chatId, update.getMessage().getChat().getFirstName());
-                    break;
-                case "/help":
-                    helpCommand(chatId);
-                    break;
-                case "/test":
-                    testCommand(chatId);
-                    break;
-                default:
-                    try {
-                        defaultCommand(chatId);
-                    } catch (ParseException e) {
-                        throw new RuntimeException("Unable to parse date");
-                    }
-                    sendMessage(chatId, responseText);
+            } else if (messageText.startsWith("/show_all_schedule")) {
+                show_all_command(chatId, messageText);
+            } else {
+                try {
+                    defaultCommand(chatId);
+                } catch (ParseException e) {
+                    throw new RuntimeException("Unable to parse date");
+                }
+                sendMessage(chatId, responseText);
             }
+
         }
 
     }
+
+
 
     private void startCommand(Long chatId, String name) {
         String answer = "Привет, " + name + ",приятно познакомится!" + "\n" +
@@ -71,19 +74,35 @@ public class TelegramBot extends TelegramLongPollingBot {
         String answer = "Вот список команд: " + "\n" +
                 "/start - перезапуск бота\n"  +
                 "/help - список комманд\n" +
-                "/test...";
+                "/show_all_schedule {Группа} - показывает все расписание группы";
         sendMessage(chatId, answer);
     }
     private void defaultCommand(Long chatId){
         String answer = "К солжалению, данной команды нет. Попробуйте заново";
         sendMessage(chatId, answer);
     }
-    private void testCommand(Long chatId){
-        Request request = new Request();
-        String response = String.valueOf(request.query("3351"));
-        ResponseParser responseParser = new ResponseParser();
-        Map<String, ApiResponse.GroupData> answer = responseParser.parsing(response);
-        sendMessage(chatId, answer.toString());
+
+    private void show_all_command(Long chatId, String messageText){
+        String[] part_of_message  = messageText.split(" ");
+        String answer;
+        if (part_of_message.length != 2){
+            answer = "Неверная команда. Попробуйте ввести /show_all_schedule + {Номер группы}";
+
+        }
+        else{
+            String number_group = part_of_message[1];
+            if ( number_group.length() != 4){
+                answer = "Номер группы должен содержать 4 цифры";
+            }
+            else{
+                Request request = new Request();
+                String response = String.valueOf(request.query(number_group, standart_week_day, standart_week, standart_season,standart_year));
+                ResponseParser responseParser = new ResponseParser();
+                answer = responseParser.parsing(response, number_group, 7);
+            }
+        }
+        sendMessage(chatId, answer);
+
     }
 
 
@@ -97,7 +116,9 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         }
     }
+
 }
+
 
 
 

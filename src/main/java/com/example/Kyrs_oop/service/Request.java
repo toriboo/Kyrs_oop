@@ -10,14 +10,18 @@ import java.nio.charset.StandardCharsets;
 
 public class Request {
 
-    public StringBuilder query(String user_request) {
-        if (user_request.isEmpty()) {
+    public StringBuilder query(String group, String week_day, String week, String season,String year) {
+        if (week.isEmpty() || group.isEmpty()||week_day.isEmpty()|| season.isEmpty()|| year.isEmpty()) {
             System.out.println("Ошибка.Пустой запрос");
             System.exit(0);
             return null;
         } else {
-            String user_request_encode = URLEncoder.encode(user_request, StandardCharsets.UTF_8);
-            String question = "https://digital.etu.ru/api/mobile/schedule?weekDay=MON&subjectType=%D0%9B%D0%B5%D0%BA&groupNumber=3351&joinWeeks=true&season=autumn&year=2024&withURL=true";
+            String group_e = URLEncoder.encode(group, StandardCharsets.UTF_8);
+            String week_day_e = URLEncoder.encode(week_day, StandardCharsets.UTF_8);
+            String week_e = URLEncoder.encode(week, StandardCharsets.UTF_8);
+            String season_e = URLEncoder.encode(season, StandardCharsets.UTF_8);
+            String year_e =  URLEncoder.encode(year, StandardCharsets.UTF_8);
+            String question = "https://digital.etu.ru/api/mobile/schedule?weekDay="+week_day_e+"&subjectType=&groupNumber="+group_e+"&joinWeeks="+week_e+"&season="+season_e+"&year="+year_e+"&withURL=true";
             return sendGetRequest(question);
         }
 

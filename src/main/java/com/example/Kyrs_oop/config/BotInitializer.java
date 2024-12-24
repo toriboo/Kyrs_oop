@@ -1,6 +1,6 @@
 package com.example.Kyrs_oop.config;
 
-import com.example.Kyrs_oop.bot.TelegramBot;
+import com.example.Kyrs_oop.service.TelegramBot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
