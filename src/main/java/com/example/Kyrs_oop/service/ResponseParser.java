@@ -2,68 +2,63 @@ package com.example.Kyrs_oop.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.stereotype.Component;
 
-import java.util.Iterator;
 
-
+@Component
 public class ResponseParser {
 
-    public String parsing(String response, String group ,int count_day) {
+    public String parsing(String response, String group, String week_number) {
         ObjectMapper objectMapper = new ObjectMapper();
-        String teacher = null;
-        StringBuilder answer;
+        String teacher;
+        String start_time ;
+        String room ;
+        String week;
+        String subjectType;
+        StringBuilder answer = new StringBuilder();
         try {
             JsonNode rootNode = objectMapper.readTree(response);
             JsonNode groupNode = rootNode.get(group);
-            for (int i = 0; i < count_day; i ++){
+            for (int i = 0; i < 7; i ++){
 
                 JsonNode daysNode = groupNode.get("days").get(String.valueOf(i));
-                String dayName = daysNode.get("name").asText();
-                System.out.println("Day Name: " + dayName);
+                if (daysNode != null) {
+                    String dayName = daysNode.get("name").asText();
+                    answer.append('\n' + dayName + '\n' + '\n');
 
+                    JsonNode lessonsNode = daysNode.get("lessons");
+                    for (JsonNode lesson : lessonsNode) {
+                        teacher = lesson.get("teacher").asText();
+                        start_time = lesson.get("start_time").asText();
+                        room = lesson.get("room").asText();
+                        week = lesson.get("week").asText();
+                        subjectType = lesson.get("subjectType").asText();
+                        String lessonName = lesson.get("name").asText();
+                        if (week_number.equals("2") || week_number.equals("1")) {
+                            if(week.equals(week_number)) {
+                                answer.append("Неделя: " + week + '\n');
+                                answer.append(start_time + ": " + lessonName + " " + subjectType + '\n');
+                                answer.append("Преподаватель: " + teacher + " ауд. " + room + '\n');
+                            }
+                        }
 
+                        else {
+                            answer.append("Неделя: " + week + '\n');
+                            answer.append(start_time + ": " + lessonName + " " + subjectType + '\n');
+                            answer.append("Преподаватель: " + teacher + " ауд. " + room + '\n');
+                        }
 
-                JsonNode lessonsNode = daysNode.get("lessons");
-                for (JsonNode lesson : lessonsNode) {
-                    teacher = lesson.get("teacher").asText();
-                    String lessonName = lesson.get("name").asText();
-                    System.out.println("Lesson: " + lessonName + ", Teacher: " + teacher);
+                    }
                 }
 
             }
-            return printJsonNode(groupNode, 0);
+            return answer.toString();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "Ошибка";
+        return "Ошибка запроса";
 
     }
-    private static String printJsonNode(JsonNode node, int level) {
-        StringBuilder answer = new StringBuilder();
-        if (node.isObject()) {
-            Iterator<String> fieldNames = node.fieldNames();
-            while (fieldNames.hasNext()) {
-                String fieldName = fieldNames.next();
-                JsonNode childNode = node.get(fieldName);
-
-                answer.append("fieldName \n");
-                printJsonNode(childNode, level + 1);
-            }
-        }
-        else if (node.isArray()) {
-            for (int i = 0; i < node.size(); i++) {
-
-                printJsonNode(node.get(i), level + 1);
-            }
-        }
-        else {
-
-            answer.append(node.asText());
-        }
-        return answer.toString();
-    }
-
-
 
 }
 
